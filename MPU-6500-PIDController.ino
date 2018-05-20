@@ -20,9 +20,6 @@ double derivativeConstant = 0.32;
 double throttle = 1300;
 float reference = 0.0;
 
-
-
-//Declaring some global variables
 int gyroX, gyroY, gyroZ;
 long accelerationXAxis, accelerationYAxis, accelerationZAxis, acc_total_vector;
 int temperature;
@@ -34,10 +31,6 @@ int angle_pitch_buffer, angleRollBuffer;
 boolean set_gyro_angles;
 float angle_roll_acc, angle_pitch_acc;
 float angle_pitch_output, angleRollOutput;
-
-//Initialize the LCD library
-
-
 
 void setup() {
   Wire.begin();
@@ -76,6 +69,7 @@ void setup() {
     gyroCalibrationZAxis += gyroZ;
     delay(3);
   }
+  
   gyroCalibrationXAxis /= 2000;
   gyroCalibrationYAxis /= 2000;
   gyroCalibrationZAxis /= 2000;
@@ -90,8 +84,8 @@ void setup() {
 }
 
 void loop() {
-  previousTime = time;  // the previous time is stored before the actual time read
-  time = millis();  // actual time read
+  previousTime = time;  
+  time = millis();  
   samplingTime = (time - previousTime) / 1000;
 
   read_mpu_6050_data();
@@ -99,12 +93,15 @@ void loop() {
   gyroX -= gyroCalibrationXAxis;
   gyroY -= gyroCalibrationYAxis;
   gyroZ -= gyroCalibrationZAxis;
+  
   //Gyro angle calculations
   //0.0000611 = 1 / (250Hz / 65.5)
+  
   angle_pitch += gyroX * 0.0000611;
   angle_roll += gyroY * 0.0000611;
 
   //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
+  
   angle_pitch += angle_roll * sin(gyroZ * 0.000001066);
   angle_roll -= angle_pitch * sin(gyroZ * 0.000001066);
 
@@ -127,7 +124,6 @@ void loop() {
     set_gyro_angles = true;
   }
 
-  //To dampen the pitch and roll angles a complementary filter is used
   angle_pitch_output = angle_pitch_output * 0.9 + angle_pitch * 0.1;
   angleRollOutput = angleRollOutput * 0.9 + angle_roll * 0.1;
   epsilon = angleRollOutput - reference;
@@ -138,9 +134,7 @@ void loop() {
     PIDCommandIntegralValue = PIDCommandIntegralValue + (integralConstant * epsilon);
   }
 
-
   PIDCommandDerivativeValue = derivativeConstant * ((epsilon - previous_epsilon) / samplingTime);
-
 
   PIDCommand = PIDCommandProportionalValue + PIDCommandIntegralValue + PIDCommandDerivativeValue;
 
@@ -186,7 +180,6 @@ void loop() {
   loop_timer = micros();
 }
 
-
 void read_mpu_6050_data() {
   Wire.beginTransmission(0x68);
   Wire.write(0x3B);
@@ -200,7 +193,6 @@ void read_mpu_6050_data() {
   gyroX = Wire.read() << 8 | Wire.read();
   gyroY = Wire.read() << 8 | Wire.read();
   gyroZ = Wire.read() << 8 | Wire.read();
-
 }
 
 void write_LCD() {
@@ -244,17 +236,3 @@ void initializeGyroscope()
   Wire.write(0x08);
   Wire.endTransmission();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
